@@ -16,7 +16,18 @@ class Stock(object):
     def getVal(self):
     	val = quantity * price
 	return val
+    
+    def setName(self, name):
+    	self.name = name
 
+    def setQuantity(self, quantity):
+    	self.quantity = quantity
+
+    def setPrice(self, price):
+    	self.price = price
+
+    def setDate(self, date):
+    	self.date = date
     #Methods
     #Buy/Create Stock(Name, Quantity, Date)
     #getName(Name)
