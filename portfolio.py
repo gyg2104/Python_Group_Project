@@ -20,9 +20,9 @@ class Portfolio(dict):
         print("Buying...")
         print(stock)
         vals = stock_data.values
-        open, high, low = vals[0][0], vals[0][1], vals[0][2]
+        opening, high, low = vals[0][0], vals[0][1], vals[0][2]
         close, volume, adj_close = vals[0][3], vals[0][4], vals[0][5]
-        print(open, high, low, close, volume, adj_close)
+        print(opening, high, low, close, volume, adj_close)
         #i'm not sure which of this data we actually need, but whatever we need I will use 
         #right here to create a stock using Brandon's stock class
         #something like stock = create_stock(ticker, close)
