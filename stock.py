@@ -28,9 +28,3 @@ class Stock(object):
 
     def setDate(self, date):
         self.date = date
-    #Methods
-    #Buy/Create Stock(Name, Quantity, Date)
-    #getName(Name)
-    #getQuant(Name)
-    #getVal(Name)
-    #
