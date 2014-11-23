@@ -209,7 +209,7 @@ def main():
             num = 0
             try:
                 num = int(input("Type amount of this stock you would like to sell: "))
-                p.sell(ticker, num)
+                p.sell(ticker.upper(), num)
                 cont = input("Continue? press y/n: ")
             except ValueError:
                 print("Not a valid number")
