@@ -194,6 +194,8 @@ def main():
                     raise WrongDayException("Chose day over 4")
                 p.buy(ticker.upper(), num, date)
                 cont = input("Continue? press y/n: ")
+            except TypeError:
+                print("Wrong format")
             except ValueError:
                 print("Not a valid number")
                 cont = input("Continue? press y/n: ") 
