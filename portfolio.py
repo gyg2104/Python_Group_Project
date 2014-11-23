@@ -93,6 +93,12 @@ class Portfolio(dict):
     def view_port_stats(self):
         time = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
         #datetime.date.today()
+        if time.weekday() > 4:
+            if time.weekday() == 5:
+                time = datetime.date.fromordinal(datetime.date.today().toordinal()-2)
+            else:
+                time = time = datetime.date.fromordinal(datetime.date.today().toordinal()-3)
+
         
         count = 0
         total_port_value = 0
