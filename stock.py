@@ -12,10 +12,11 @@ class Stock(object):
         self.quantity = quantity
         self.price = price
         self.date = date
+        self.val = quantity * price
 
     def getVal(self):
-        val = quantity * price
-        return val
+        #val = quantity * price
+        return self.val
     
     def setName(self, name):
         self.name = name
