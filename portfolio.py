@@ -20,10 +20,12 @@ class Portfolio(dict):
     def buy(self, ticker, amount):
         opening, high, low, close, volume, adj_close = 0, 0, 0, 0, 0, 0
         stock_data = None
+        #assume that you add the stock to this portfolio tracker 
+        #the day after when the yahoo financial website is updated
+        #and the closing time details have been uploaded
         time = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
         try:
-            #if the stock market wasn't open today, or it is still open
-            #can't get the data for it today, so error occurs
+            #you bought a stock yesterday, get the info on it
             stock_data = web.DataReader(ticker, 'yahoo', time)#datetime.date.today())
             print("Trying to buy...")
             vals = stock_data.values
@@ -82,7 +84,12 @@ class Portfolio(dict):
         print(stock_info)
 
     def view_port_stats(self):
+        time = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
+        #datetime.date.today()
+        
         count = 0
+        total_port_value = 0
+        total_port_perf = 0
         if not self.port:
             print("You don't own any stocks!")
         for i in self.port:
@@ -92,8 +99,23 @@ class Portfolio(dict):
             print("Amt: ",i.quantity)
             print("Bought for: ", i.price, " each")
             print("On date: ", i.date)
+            try:
+                cur_val =  web.DataReader(i.name, 'yahoo', time).values[0][3]
+                print("Currently valued at: ", cur_val)
+                total_port_value = total_port_value + (cur_val * i.quantity)
+                perf_val = (cur_val - i.price) * i.quantity
+                print("Performance value: ", perf_val)
+                total_port_perf = total_port_perf + perf_val
+            except:
+    
+                print("Market data for today unavailable, analysis cannot be done yet")
+                pass     
 
-
+         
+        print("XXXXXXXXXXXXXXXXXXX")
+        print("Total portfolio value: ", total_port_value)
+        print("Total portfolio performance: ", total_port_perf)
+   
 
     def save_portfolio(self):
         #saves current port to a file
@@ -133,7 +155,7 @@ def main():
                 cont = input("Continue? press y/n: ")
             except ValueError:
                 print("Not a valid number")
-                cont = input("COntinue? press y/n: ") 
+                cont = input("Continue? press y/n: ") 
 
 
         elif choice.upper() == 'V':
