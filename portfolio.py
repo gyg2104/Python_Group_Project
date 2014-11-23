@@ -3,6 +3,13 @@ import pandas as pd
 import pandas.io.data as web
 import datetime
 from stock import Stock
+import pylab
+
+class WrongDayException(Exception):
+    def __init__(self, value):
+        self.parameter = value
+    def __str__(self):
+        return repr(self.parameter)
 
 class Portfolio(dict):
     
@@ -17,13 +24,13 @@ class Portfolio(dict):
             print("That is not a valid portfolio name!")
         
     
-    def buy(self, ticker, amount):
+    def buy(self, ticker, amount, time):
         opening, high, low, close, volume, adj_close = 0, 0, 0, 0, 0, 0
         stock_data = None
         #assume that you add the stock to this portfolio tracker 
         #the day after when the yahoo financial website is updated
         #and the closing time details have been uploaded
-        time = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
+        #time = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
         try:
             #you bought a stock yesterday, get the info on it
             stock_data = web.DataReader(ticker, 'yahoo', time)#datetime.date.today())
@@ -43,7 +50,7 @@ class Portfolio(dict):
             print("Buying succesful, here are the stats for ", ticker) 
             print(stock_data)
             #print(opening, high, low, close, volume, adj_close)
-            my_stock = Stock(ticker, amount, close, datetime.date.today())
+            my_stock = Stock(ticker, amount, close, time)
             self.port.append(my_stock)
         
         
@@ -115,7 +122,41 @@ class Portfolio(dict):
         print("XXXXXXXXXXXXXXXXXXX")
         print("Total portfolio value: ", total_port_value)
         print("Total portfolio performance: ", total_port_perf)
-   
+        try:
+            perc_gain = (total_port_perf/(total_port_value - total_port_perf))*100
+            print("Total portfolio % gain: ", perc_gain, "%")
+        except ZeroDivisionError:
+            print("% Gain results unavailable")
+
+    def analyze(self):
+        #pie chart composition of portfolio
+        p_data = []
+        for stock in self.port:
+            p_data.append({"name": stock.name, "quantity": stock.quantity, "price": stock.price, \
+                "date": stock.date, "value": stock.getVal()})
+
+        p_data = pd.DataFrame(p_data)
+        p_data_g = p_data.groupby("name").sum() #grouups stocks of same ticker purchased at dif time
+        p_data_g["pct_value"] = p_data_g["value"]/sum(p_data_g["value"])
+        f = p_data_g.plot(kind = "pie", y = "pct_value", autopct='%.2f')
+        pylab.show(f)
+        
+        #time series and prediction analysis
+        today = datetime.date.fromordinal(datetime.date.today().toordinal())
+        #if today.weekday() > 4:
+         #   today = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
+        prices = {}
+        for stock in self.port:
+            start_date = stock.date
+            print(start_date)
+            print(today)
+            p = web.DataReader(stock.name, "yahoo", start_date, today)
+            p["quantity"] = stock.quantity
+            prices[str(stock.name) + "_" + str(stock.date)] = p
+        prices = pd.Panel(prices)
+        pylab.show((prices.ix[:,:,"quantity"]*prices.ix[:,:,"Adj Close"]).sum(axis=1).plot())
+        print(prices)
+
 
     def save_portfolio(self):
         #saves current port to a file
@@ -127,7 +168,7 @@ def main():
     cont = "Y"
     print("Welcome!")
     while cont.upper() == "Y":
-        print("Press 'L' to load port, 'B' to buy, 'S' to sell, 'V' to view, 'X' to save")
+        print("Press 'L'- load, 'B' - buy, 'S'- sell, 'V'- view, 'X'- save, 'A' - analyze ")
         choice = input("Your choice: ")
     
         if choice.upper() == 'L':
@@ -139,11 +180,20 @@ def main():
             num = 0
             try:
                 num = int(input("Type amount of this stock you would like to buy: "))
-                p.buy(ticker.upper(), num)
+                d = input("Enter the date purchased in format YYYY-MM-DD: ")
+                date = datetime.datetime(*map(int, d.split("-")))
+                if date == datetime.date.today():
+                    date = time = datetime.date.fromordinal(datetime.date.today().toordinal()-1)
+                if date.weekday() > 4:
+                    raise WrongDayException("Chose day over 4")
+                p.buy(ticker.upper(), num, date)
                 cont = input("Continue? press y/n: ")
             except ValueError:
                 print("Not a valid number")
-                cont = input("COntinue? press y/n: ") 
+                cont = input("Continue? press y/n: ") 
+            except WrongDayException:
+                print("Stock market wasn't open on that day!")
+                cont = input("Continue? press y/n: ")
 
 
         elif choice.upper() == 'S':
@@ -160,6 +210,10 @@ def main():
 
         elif choice.upper() == 'V':
             p.view_port_stats()
+            cont = input("Continue? press y/n: ")
+
+        elif choice.upper() == 'A':
+            p.analyze()
             cont = input("Continue? press y/n: ")
 
         elif choice.upper() == 'X':
