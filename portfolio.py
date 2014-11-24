@@ -50,7 +50,7 @@ class Portfolio(dict):
             print("Buying succesful, here are the stats for ", ticker) 
             print(stock_data)
             #print(opening, high, low, close, volume, adj_close)
-            my_stock = Stock(ticker, amount, close, time)
+            my_stock = Stock(ticker, amount, adj_close, time)
             self.port.append(my_stock)
         
         
@@ -113,7 +113,7 @@ class Portfolio(dict):
             print("Bought for: ", i.price, " each")
             print("On date: ", i.date)
             try:
-                cur_val =  web.DataReader(i.name, 'yahoo', time).values[0][3]
+                cur_val =  web.DataReader(i.name, 'yahoo', time).values[0][5]
                 print("Currently valued at: ", cur_val)
                 total_port_value = total_port_value + (cur_val * i.quantity)
                 perf_val = (cur_val - i.price) * i.quantity
