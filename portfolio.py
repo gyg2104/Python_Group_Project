@@ -103,6 +103,7 @@ class Portfolio(dict):
         count = 0
         total_port_value = 0
         total_port_perf = 0
+        total_initial = 0
         if not self.port:
             print("You don't own any stocks!")
         for i in self.port:
@@ -113,11 +114,14 @@ class Portfolio(dict):
             print("Bought for: ", i.price, " each")
             print("On date: ", i.date)
             try:
+                print("Initial investment: ", (i.price * i.quantity))
+                total_initial = total_initial + (i.price * i.quantity)
                 cur_val =  web.DataReader(i.name, 'yahoo', time).values[0][5]
-                print("Currently valued at: ", cur_val)
+                print("Current stock price: ", cur_val)
                 total_port_value = total_port_value + (cur_val * i.quantity)
                 perf_val = (cur_val - i.price) * i.quantity
-                print("Performance value: ", perf_val)
+                print("Current value of investment: $", (cur_val * i.quantity))
+                print("Gain or Loss: $", perf_val)
                 total_port_perf = total_port_perf + perf_val
             except:
     
@@ -126,8 +130,9 @@ class Portfolio(dict):
 
          
         print("XXXXXXXXXXXXXXXXXXX")
-        print("Total portfolio value: ", total_port_value)
-        print("Total portfolio performance: ", total_port_perf)
+        print("Total money initially invested: ", total_initial)
+        print("Total current portfolio value: ", total_port_value)
+        print("Total portfolio gain or loss: ", total_port_perf)
         try:
             perc_gain = (total_port_perf/(total_port_value - total_port_perf))*100
             print("Total portfolio % gain: ", perc_gain, "%")
